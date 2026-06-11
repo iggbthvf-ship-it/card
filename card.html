@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>一封给你的贺卡</title>
+<style>
+:root{
+  --accent:#e0526e; --accent-deep:#b93a54; --bg:#fdf1f3; --bg-soft:#fbe2e7;
+  --card:#ffffff; --ink:#5a4a4e; --ink-soft:#9c8a8e;
+}
+/* ===== 8 套主题色 ===== */
+[data-color="cherry"]{ --accent:#e0526e; --accent-deep:#b93a54; --bg:#fdf1f3; --bg-soft:#fbe2e7; --ink:#5a4a4e; --ink-soft:#9c8a8e;}
+[data-color="avocado"]{--accent:#6f9a4d; --accent-deep:#557a38; --bg:#f4f8ee; --bg-soft:#e4efd6; --ink:#4a553e; --ink-soft:#8c9a7e;}
+[data-color="blue"]{   --accent:#4f7faa; --accent-deep:#3a6388; --bg:#f0f5fa; --bg-soft:#dcebf6; --ink:#414e5a; --ink-soft:#83929f;}
+[data-color="taro"]{   --accent:#8268b8; --accent-deep:#665093; --bg:#f5f2fa; --bg-soft:#e9e1f5; --ink:#4e4659; --ink-soft:#94899f;}
+[data-color="peach"]{  --accent:#e0824a; --accent-deep:#bd6633; --bg:#fdf4ec; --bg-soft:#fae4d2; --ink:#5d4a3c; --ink-soft:#a08a78;}
+[data-color="mint"]{   --accent:#3f9583; --accent-deep:#2e7665; --bg:#eef8f5; --bg-soft:#d8efe9; --ink:#3e5650; --ink-soft:#7e9a92;}
+[data-color="cream"]{  --accent:#c2992e; --accent-deep:#9c7a1f; --bg:#fdf8ec; --bg-soft:#f8ecca; --ink:#5d5238; --ink-soft:#a39775;}
+[data-color="cocoa"]{  --accent:#8a6246; --accent-deep:#6c4a33; --bg:#f8f2ed; --bg-soft:#eee0d4; --ink:#52443a; --ink-soft:#9a8a7c;}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--ink); overflow:hidden;
+}
+.en{font-family:"Snell Roundhand","Segoe Script","Brush Script MT",cursive}
+
+/* ===== 封面 ===== */
+#cover{
+  position:fixed; inset:0; z-index:50; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:18px; background:var(--bg);
+  transition:opacity .8s ease, transform .8s ease; text-align:center; padding:24px;
+}
+#cover.gone{opacity:0; transform:translateY(-6%); pointer-events:none}
+#cover .mascot{width:200px; height:200px; animation:bob 3s ease-in-out infinite}
+#cover h1{font-size:30px; font-weight:600; letter-spacing:2px}
+#cover h1 b{color:var(--accent); font-weight:700}
+#cover .sub{font-size:14px; color:var(--ink-soft); letter-spacing:6px}
+#openBtn{
+  margin-top:14px; border:none; background:var(--accent); color:#fff;
+  font-size:16px; letter-spacing:4px; padding:13px 42px; border-radius:999px;
+  box-shadow:0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent);
+  animation:pulse 1.8s ease-in-out infinite; cursor:pointer;
+}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* ===== 正文 ===== */
+#stage{height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; position:relative; z-index:2}
+.page{min-height:100%; padding:56px 26px 64px; display:flex; flex-direction:column; align-items:center}
+.reveal{opacity:0; transform:translateY(24px); transition:opacity .9s ease, transform .9s ease}
+.reveal.in{opacity:1; transform:none}
+
+.head-mascot{width:150px;height:150px;margin-bottom:6px}
+.title-en{font-size:34px; color:var(--accent); margin-bottom:2px}
+.title-cn{font-size:24px; font-weight:700; letter-spacing:3px; margin-bottom:4px}
+.to-line{font-size:14px; color:var(--ink-soft); margin-bottom:26px; letter-spacing:1px}
+
+.letter{
+  width:100%; max-width:430px; background:var(--card); border-radius:18px;
+  padding:30px 24px 26px; position:relative;
+  box-shadow:0 10px 30px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.letter::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:6px;
+  border-radius:18px 18px 0 0;
+  background:repeating-linear-gradient(45deg,var(--accent) 0 12px,var(--bg-soft) 12px 24px);
+}
+.letter .text{
+  font-size:16px; line-height:2.05; white-space:pre-wrap; word-break:break-word;
+  min-height:120px; letter-spacing:.5px;
+}
+.caret{display:inline-block; width:2px; height:1.05em; background:var(--accent);
+  vertical-align:-0.15em; animation:blink .8s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.letter .from{margin-top:22px; text-align:right; color:var(--ink-soft); font-size:14px}
+.letter .from b{color:var(--accent); font-size:16px; margin-left:6px}
+
+/* 照片 */
+.photos{width:100%; max-width:430px; margin-top:40px; display:flex; flex-wrap:wrap; justify-content:center; gap:22px}
+.polaroid{
+  background:#fff; padding:10px 10px 30px; border-radius:6px;
+  box-shadow:0 8px 22px rgba(0,0,0,.12); width:46%; min-width:140px; position:relative;
+}
+.polaroid:nth-child(odd){transform:rotate(-3deg)}
+.polaroid:nth-child(even){transform:rotate(2.5deg); margin-top:14px}
+.polaroid img{width:100%; aspect-ratio:1/1.05; object-fit:cover; border-radius:3px; display:block; background:var(--bg-soft)}
+.polaroid::after{
+  content:""; position:absolute; top:-9px; left:50%; transform:translateX(-50%) rotate(-2deg);
+  width:54px; height:18px; background:color-mix(in srgb, var(--accent) 30%, #fff);
+  opacity:.85; border-radius:2px;
+}
+
+/* 结尾 */
+.ending{margin-top:54px; text-align:center}
+.ending .mini{width:120px;height:120px}
+.ending p{margin-top:8px; color:var(--ink-soft); font-size:13px; letter-spacing:2px}
+.ending .en{font-size:26px; color:var(--accent); margin-top:4px}
+
+/* 氛围画布 */
+#fx{position:fixed; inset:0; z-index:1; pointer-events:none}
+
+/* BGM 按钮 */
+#bgmBtn{
+  position:fixed; top:16px; right:16px; z-index:60; width:42px; height:42px;
+  border-radius:50%; border:none; background:var(--card); color:var(--accent);
+  box-shadow:0 4px 14px rgba(0,0,0,.12); font-size:18px; display:none;
+  align-items:center; justify-content:center; cursor:pointer;
+}
+#bgmBtn.spin svg{animation:rot 3s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* 过期 / 错误页 */
+.notice{
+  position:fixed; inset:0; z-index:99; background:var(--bg); display:none;
+  flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:30px; text-align:center;
+}
+.notice .mascot{width:140px;height:140px;opacity:.9}
+.notice h2{font-size:20px; letter-spacing:2px}
+.notice p{font-size:14px; color:var(--ink-soft); line-height:1.8}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important; transition:none!important}
+}
+</style>
+</head>
+<body data-color="cherry">
+
+<canvas id="fx"></canvas>
+
+<button id="bgmBtn" aria-label="播放音乐">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+</button>
+
+<div id="cover">
+  <div class="mascot" id="coverMascot"></div>
+  <h1>Hi <b id="coverName"></b></h1>
+  <div class="sub" id="coverSub">有一封贺卡待开启</div>
+  <button id="openBtn">轻触开启</button>
+</div>
+
+<div id="stage">
+  <div class="page">
+    <div class="head-mascot reveal" id="headMascot"></div>
+    <div class="title-en en reveal" id="titleEn"></div>
+    <div class="title-cn reveal" id="titleCn"></div>
+    <div class="to-line reveal" id="toLine"></div>
+
+    <div class="letter reveal">
+      <div class="text" id="blessing"></div>
+      <div class="from" id="fromLine"></div>
+    </div>
+
+    <div class="photos" id="photos"></div>
+
+    <div class="ending reveal">
+      <div class="mini" id="endMascot"></div>
+      <div class="en" id="endEn"></div>
+      <p id="endCn"></p>
+    </div>
+  </div>
+</div>
+
+<div class="notice" id="notice">
+  <div class="mascot" id="noticeMascot"></div>
+  <h2 id="noticeTitle"></h2>
+  <p id="noticeText"></p>
+</div>
+
+<script>
+/* ================= 原创卡通动物 SVG（3 套主题） ================= */
+/* 颜色全部走 CSS 变量,跟随 8 套主题色自动换色 */
+const SVGS = {
+
+/* —— 主题1:生日派对(戴帽小熊 + 蛋糕) —— */
+birthday: `
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <!-- 耳朵 -->
+  <circle cx="62" cy="62" r="20" fill="#e8c39a"/><circle cx="62" cy="62" r="10" fill="#f6dec0"/>
+  <circle cx="138" cy="62" r="20" fill="#e8c39a"/><circle cx="138" cy="62" r="10" fill="#f6dec0"/>
+  <!-- 头 -->
+  <circle cx="100" cy="92" r="46" fill="#eccda6"/>
+  <!-- 派对帽 -->
+  <path d="M100 22 L122 58 L78 58 Z" fill="var(--accent)"/>
+  <circle cx="100" cy="22" r="7" fill="var(--accent-deep)"/>
+  <path d="M82 52 L118 52 L122 58 L78 58 Z" fill="var(--accent-deep)" opacity=".35"/>
+  <!-- 脸 -->
+  <circle cx="84" cy="90" r="4.5" fill="#4a3b30"/>
+  <circle cx="116" cy="90" r="4.5" fill="#4a3b30"/>
+  <circle cx="85.5" cy="88.5" r="1.4" fill="#fff"/>
+  <circle cx="117.5" cy="88.5" r="1.4" fill="#fff"/>
+  <ellipse cx="100" cy="104" rx="14" ry="11" fill="#f8e7cd"/>
+  <ellipse cx="100" cy="100" rx="4.5" ry="3.5" fill="#4a3b30"/>
+  <path d="M100 104 q0 5 -5 6 M100 104 q0 5 5 6" stroke="#4a3b30" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="72" cy="102" r="6" fill="var(--accent)" opacity=".35"/>
+  <circle cx="128" cy="102" r="6" fill="var(--accent)" opacity=".35"/>
+  <!-- 身体 + 蛋糕 -->
+  <ellipse cx="100" cy="158" rx="36" ry="26" fill="#eccda6"/>
+  <rect x="76" y="146" width="48" height="24" rx="6" fill="var(--accent)" opacity=".9"/>
+  <path d="M76 152 q6 6 12 0 t12 0 t12 0 t12 0 V146 H76 Z" fill="#fff" opacity=".9"/>
+  <rect x="97" y="132" width="6" height="14" rx="3" fill="var(--accent-deep)"/>
+  <path d="M100 124 q5 6 0 10 q-5 -4 0 -10" fill="#ffce54"/>
+  <!-- 手 -->
+  <circle cx="68" cy="150" r="9" fill="#e8c39a"/>
+  <circle cx="132" cy="150" r="9" fill="#e8c39a"/>
+ </g>
+</svg>`,
+
+/* —— 主题2:浪漫心动(一对小兔) —— */
+love: `
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <!-- 左兔 -->
+  <ellipse cx="62" cy="74" rx="9" ry="26" fill="#f7f3ef" transform="rotate(-10 62 74)"/>
+  <ellipse cx="62" cy="78" rx="4.5" ry="18" fill="var(--accent)" opacity=".3" transform="rotate(-10 62 78)"/>
+  <ellipse cx="86" cy="72" rx="9" ry="26" fill="#f7f3ef" transform="rotate(8 86 72)"/>
+  <ellipse cx="86" cy="76" rx="4.5" ry="18" fill="var(--accent)" opacity=".3" transform="rotate(8 86 76)"/>
+  <circle cx="74" cy="116" r="34" fill="#f7f3ef"/>
+  <circle cx="63" cy="112" r="3.8" fill="#4a3b30"/><circle cx="85" cy="112" r="3.8" fill="#4a3b30"/>
+  <circle cx="64.2" cy="110.8" r="1.2" fill="#fff"/><circle cx="86.2" cy="110.8" r="1.2" fill="#fff"/>
+  <path d="M71 121 q3 3 6 0" stroke="#4a3b30" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="74" cy="117.5" rx="2.6" ry="2" fill="var(--accent)"/>
+  <circle cx="56" cy="122" r="5" fill="var(--accent)" opacity=".3"/>
+  <circle cx="92" cy="122" r="5" fill="var(--accent)" opacity=".3"/>
+  <ellipse cx="74" cy="162" rx="26" ry="18" fill="#f7f3ef"/>
+  <!-- 右兔 -->
+  <ellipse cx="118" cy="80" rx="8" ry="23" fill="#efe6da" transform="rotate(-8 118 80)"/>
+  <ellipse cx="140" cy="78" rx="8" ry="23" fill="#efe6da" transform="rotate(10 140 78)"/>
+  <ellipse cx="118" cy="83" rx="4" ry="15" fill="var(--accent)" opacity=".3" transform="rotate(-8 118 83)"/>
+  <ellipse cx="140" cy="81" rx="4" ry="15" fill="var(--accent)" opacity=".3" transform="rotate(10 140 81)"/>
+  <circle cx="129" cy="118" r="30" fill="#efe6da"/>
+  <path d="M118 114 q3 -3 6 0 M134 114 q3 -3 6 0" stroke="#4a3b30" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <path d="M126 122 q3 3 6 0" stroke="#4a3b30" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="129" cy="119" rx="2.4" ry="1.8" fill="var(--accent)"/>
+  <circle cx="113" cy="126" r="4.5" fill="var(--accent)" opacity=".3"/>
+  <circle cx="145" cy="126" r="4.5" fill="var(--accent)" opacity=".3"/>
+  <ellipse cx="129" cy="160" rx="23" ry="16" fill="#efe6da"/>
+  <!-- 中间的心 -->
+  <path d="M101 132 c-4 -7 -14 -5 -14 2 c0 6 8 10 14 14 c6 -4 14 -8 14 -14 c0 -7 -10 -9 -14 -2 Z" fill="var(--accent)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.12;1" dur="1.6s" repeatCount="indefinite" additive="sum" />
+  </path>
+ </g>
+</svg>`,
+
+/* —— 主题3:温馨星空(月亮上的小猫) —— */
+starry: `
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <!-- 月亮 -->
+  <path d="M150 40 a72 72 0 1 0 18 96 a58 58 0 0 1 -18 -96 Z" fill="var(--accent)" opacity=".22"/>
+  <path d="M146 50 a62 62 0 1 0 16 84 a50 50 0 0 1 -16 -84 Z" fill="var(--accent)" opacity=".5"/>
+  <!-- 小猫 -->
+  <path d="M70 78 l-8 -18 l16 6 Z" fill="#8d8d99"/>
+  <path d="M108 78 l8 -18 l-16 6 Z" fill="#8d8d99"/>
+  <path d="M73 76 l-4 -9 l8 3 Z" fill="var(--accent)" opacity=".5"/>
+  <path d="M105 76 l4 -9 l-8 3 Z" fill="var(--accent)" opacity=".5"/>
+  <circle cx="89" cy="100" r="34" fill="#9c9ca8"/>
+  <path d="M76 98 q3 4 6 0 M96 98 q3 4 6 0" stroke="#3d3d47" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <ellipse cx="89" cy="106" rx="2.6" ry="2" fill="#3d3d47"/>
+  <path d="M89 108 q0 4 -4 5 M89 108 q0 4 4 5" stroke="#3d3d47" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <circle cx="71" cy="108" r="4.5" fill="var(--accent)" opacity=".4"/>
+  <circle cx="107" cy="108" r="4.5" fill="var(--accent)" opacity=".4"/>
+  <path d="M60 100 h-12 M62 106 h-11 M118 100 h12 M116 106 h11" stroke="#9c9ca8" stroke-width="2" stroke-linecap="round"/>
+  <!-- 身体趴在月牙上 -->
+  <ellipse cx="89" cy="140" rx="30" ry="18" fill="#9c9ca8"/>
+  <path d="M117 138 q16 2 14 16" stroke="#9c9ca8" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <!-- 星星 -->
+  <g fill="var(--accent)">
+    <path d="M40 44 l3 7 l7 3 l-7 3 l-3 7 l-3 -7 l-7 -3 l7 -3 Z" opacity=".8">
+      <animate attributeName="opacity" values=".8;.2;.8" dur="2.2s" repeatCount="indefinite"/></path>
+    <path d="M158 142 l2.4 5.6 l5.6 2.4 l-5.6 2.4 l-2.4 5.6 l-2.4 -5.6 l-5.6 -2.4 l5.6 -2.4 Z" opacity=".7">
+      <animate attributeName="opacity" values=".3;.9;.3" dur="2.8s" repeatCount="indefinite"/></path>
+    <circle cx="146" cy="58" r="3"><animate attributeName="opacity" values="1;.2;1" dur="1.9s" repeatCount="indefinite"/></circle>
+    <circle cx="36" cy="128" r="2.5"><animate attributeName="opacity" values=".3;1;.3" dur="2.4s" repeatCount="indefinite"/></circle>
+  </g>
+ </g>
+</svg>`
+};
+
+/* 主题文案与氛围粒子 */
+const THEMES = {
+  birthday:{ en:"Happy Birthday", cnDefault:"生日快乐", sub:"有一份生日惊喜待开启",
+             endEn:"Make a wish", endCn:"愿所有美好如期而至", fx:"confetti" },
+  love:{     en:"For You",        cnDefault:"心动签收", sub:"有一封心意待开启",
+             endEn:"Love you",    endCn:"往后的日子,都想和你一起", fx:"hearts" },
+  starry:{   en:"Good Night",     cnDefault:"温柔晚安", sub:"有一片星空为你点亮",
+             endEn:"Sweet dreams",endCn:"今晚的星星,都替我看着你", fx:"stars" }
+};
+
+/* ================= 读取卡片数据 ================= */
+function getParam(k){ return new URLSearchParams(location.search).get(k); }
+
+async function loadConfig(){
+  // 预览模式:生成器通过 #cfg= 传入 base64 配置
+  if(location.hash.startsWith("#cfg=")){
+    try{
+      const raw = decodeURIComponent(escape(atob(location.hash.slice(5))));
+      return JSON.parse(raw);
+    }catch(e){ console.error(e); }
+  }
+  const id = getParam("id") || "demo";
+  if(!/^[a-zA-Z0-9_-]{1,32}$/.test(id)) throw new Error("bad id");
+  const res = await fetch(`data/${id}.json?t=${Date.now()}`);
+  if(!res.ok) throw new Error("not found");
+  const cfg = await res.json();
+  cfg.__id = id;
+  return cfg;
+}
+
+function esc(s){ const d=document.createElement("div"); d.textContent=s||""; return d.innerHTML; }
+
+function showNotice(title, text, theme){
+  const t = THEMES[theme] ? theme : "birthday";
+  document.getElementById("noticeMascot").innerHTML = SVGS[t];
+  document.getElementById("noticeTitle").textContent = title;
+  document.getElementById("noticeText").textContent = text;
+  document.getElementById("notice").style.display = "flex";
+  document.getElementById("cover").style.display = "none";
+}
+
+/* ================= 渲染 ================= */
+let CFG=null;
+loadConfig().then(cfg=>{
+  CFG = cfg;
+  const theme = THEMES[cfg.theme] ? cfg.theme : "birthday";
+  const T = THEMES[theme];
+  document.body.dataset.color = cfg.color || "cherry";
+
+  // 有效期
+  if(cfg.expireAt && Date.now() > new Date(cfg.expireAt).getTime()){
+    showNotice("这张贺卡已过期", "贺卡有效期已结束。\n如需续期或重新制作,请联系赠送人。", theme);
+    return;
+  }
+
+  // 封面
+  document.getElementById("coverMascot").innerHTML = SVGS[theme];
+  document.getElementById("coverName").textContent = cfg.to || "朋友";
+  document.getElementById("coverSub").textContent = cfg.coverSub || T.sub;
+
+  // 正文
+  document.getElementById("headMascot").innerHTML = SVGS[theme];
+  document.getElementById("titleEn").textContent = T.en;
+  document.getElementById("titleCn").textContent = cfg.title || T.cnDefault;
+  document.getElementById("toLine").textContent = `致 亲爱的 ${cfg.to || "你"}`;
+  document.getElementById("fromLine").innerHTML = cfg.from ? `来自<b>${esc(cfg.from)}</b>` : "";
+  document.getElementById("endMascot").innerHTML = SVGS[theme];
+  document.getElementById("endEn").textContent = T.endEn;
+  document.getElementById("endCn").textContent = cfg.endText || T.endCn;
+
+  // 照片
+  const box = document.getElementById("photos");
+  (cfg.photos||[]).slice(0,9).forEach(src=>{
+    const d = document.createElement("div");
+    d.className = "polaroid";
+    const img = document.createElement("img");
+    img.src = src; img.alt = "";
+    d.appendChild(img); box.appendChild(d);
+  });
+
+  // BGM
+  if(cfg.bgm){
+    const a = new Audio(cfg.bgm); a.loop = true; window.__bgm = a;
+    const btn = document.getElementById("bgmBtn");
+    btn.style.display = "flex";
+    btn.onclick = ()=>{ a.paused ? (a.play(), btn.classList.add("spin"))
+                                 : (a.pause(), btn.classList.remove("spin")); };
+  }
+
+  // 开启
+  document.getElementById("openBtn").onclick = ()=>{
+    document.getElementById("cover").classList.add("gone");
+    if(window.__bgm){ window.__bgm.play().then(()=>document.getElementById("bgmBtn").classList.add("spin")).catch(()=>{}); }
+    startFx(T.fx);
+    setTimeout(()=>{ revealAll(); typeBlessing(cfg.blessing || "祝你天天开心!"); }, 500);
+  };
+}).catch(()=>{
+  showNotice("没有找到这张贺卡", "链接可能不完整,或贺卡尚未生成。\n请联系赠送人确认。", "birthday");
+});
+
+/* 渐入 */
+function revealAll(){
+  const els = document.querySelectorAll(".reveal");
+  els.forEach((el,i)=> setTimeout(()=>el.classList.add("in"), i*180));
+}
+
+/* 打字机 */
+function typeBlessing(text){
+  const box = document.getElementById("blessing");
+  const caret = document.createElement("span"); caret.className="caret";
+  box.appendChild(caret);
+  let i=0;
+  (function step(){
+    if(i < text.length){
+      caret.insertAdjacentText("beforebegin", text[i++]);
+      setTimeout(step, /[\n。!!,,、]/.test(text[i-1]) ? 260 : 95);
+    } else { setTimeout(()=>caret.remove(), 4000); }
+  })();
+}
+
+/* ================= 氛围粒子 ================= */
+function startFx(kind){
+  const cv = document.getElementById("fx"), ctx = cv.getContext("2d");
+  let W,H; const resize=()=>{W=cv.width=innerWidth*devicePixelRatio;H=cv.height=innerHeight*devicePixelRatio;};
+  resize(); addEventListener("resize",resize);
+  const accent = getComputedStyle(document.body).getPropertyValue("--accent").trim();
+  const colors = [accent, "#ffce54", "#ffffff"];
+  const N = kind==="confetti" ? 70 : 40;
+  const ps = Array.from({length:N}, ()=>spawn(true));
+
+  function spawn(init){
+    const r = (a,b)=>a+Math.random()*(b-a);
+    return {
+      x:r(0,W), y:init?r(0,H):(kind==="hearts"?H+20*devicePixelRatio:-20*devicePixelRatio),
+      s:r(6,14)*devicePixelRatio, v:r(.4,1.4)*devicePixelRatio,
+      drift:r(-.5,.5)*devicePixelRatio, rot:r(0,Math.PI*2), vr:r(-.03,.03),
+      c:colors[Math.floor(Math.random()*colors.length)], a:r(.4,.95)
+    };
+  }
+  function heart(ctx,s){ ctx.beginPath();
+    ctx.moveTo(0,s*.3); ctx.bezierCurveTo(-s,-s*.5,-s*.5,-s*1.1,0,-s*.4);
+    ctx.bezierCurveTo(s*.5,-s*1.1,s,-s*.5,0,s*.3); ctx.fill(); }
+  function star(ctx,s){ ctx.beginPath();
+    for(let i=0;i<5;i++){ const a=-Math.PI/2+i*2*Math.PI/5, b=a+Math.PI/5;
+      ctx.lineTo(Math.cos(a)*s,Math.sin(a)*s); ctx.lineTo(Math.cos(b)*s*.45,Math.sin(b)*s*.45); }
+    ctx.closePath(); ctx.fill(); }
+
+  (function loop(){
+    ctx.clearRect(0,0,W,H);
+    ps.forEach((p,i)=>{
+      p.rot+=p.vr; p.x+=p.drift;
+      if(kind==="hearts"){ p.y-=p.v; if(p.y<-30) ps[i]=spawn(false); }
+      else { p.y+=p.v; if(p.y>H+30) ps[i]=spawn(false); }
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.globalAlpha=p.a; ctx.fillStyle=p.c;
+      if(kind==="confetti") ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);
+      else if(kind==="hearts") heart(ctx,p.s*.7);
+      else star(ctx,p.s*.5);
+      ctx.restore();
+    });
+    requestAnimationFrame(loop);
+  })();
+}
+</script>
+</body>
+</html>
